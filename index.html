@@ -1,0 +1,727 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F7F0E6">
+<title>GoPratle — Post your event requirement</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@500&family=DM+Sans:wght@400;500;600&family=Fraunces:ital,opsz,wght@0,9..144,600;1,9..144,600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F7F0E6; --surface:#FFFBF5; --ink:#2B1A16; --muted:#7D6B63; --line:#E2D5C4;
+  --verm:#D9432B; --verm-deep:#B13420; --apricot:#F4C9A0; --apricot-soft:#FBE6CF; --moss:#4F7A5A;
+  --tline:#4A362F; --tline-strong:#8A7066;
+  --serif:'Fraunces',Georgia,serif; --sans:'DM Sans',system-ui,sans-serif; --mono:'DM Mono',ui-monospace,monospace;
+}
+*{box-sizing:border-box;margin:0}
+html{-webkit-text-size-adjust:100%;overflow-x:clip}
+body{background:var(--paper);color:var(--ink);font:400 16px/24px var(--sans);min-height:100vh;display:flex;flex-direction:column;overflow-x:clip}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;background:none;border:0;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+:focus-visible{outline:3px solid var(--verm);outline-offset:3px;border-radius:8px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+/* header */
+.top{display:flex;justify-content:space-between;align-items:center;padding:28px 64px 0}
+.logo{display:flex;align-items:center;gap:8px;font:600 20px/26px var(--serif);color:var(--ink);text-decoration:none}
+.logo i{width:12px;height:12px;border-radius:50%;background:var(--verm)}
+.link{font:500 14px/20px var(--sans);text-decoration:underline;text-underline-offset:3px}
+
+/* stepper */
+.stepper{display:flex;align-items:center;gap:14px;padding:28px 64px 0;list-style:none;flex-wrap:wrap}
+.stepper li{display:flex;align-items:center;gap:10px;font:500 14px/20px var(--sans);color:var(--muted)}
+.stepper .dot{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;border:1.5px solid var(--line);font:500 12px var(--mono)}
+.stepper .perf{width:32px;border-top:1.5px dashed var(--line)}
+.stepper li.done{color:var(--ink)} .stepper li.done .dot{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.stepper li.done+.perf{border-color:var(--ink)}
+.stepper li.now{color:var(--ink)} .stepper li.now .dot{background:var(--verm);border-color:var(--verm);color:#fff}
+.stepper button.stp{display:flex;align-items:center;gap:10px;color:inherit;font:inherit}
+.stepper.hidden{visibility:hidden}
+
+/* layout */
+.stage{flex:1;display:grid;grid-template-columns:minmax(0,780px) minmax(380px,440px);gap:96px;padding:36px 64px 40px;max-width:1440px;width:100%;margin:0 auto;justify-content:space-between;position:relative}
+.glow{position:absolute;right:-40px;top:70px;width:560px;height:560px;border-radius:50%;background:var(--apricot-soft);z-index:0;pointer-events:none}
+.col,.ticket-wrap{position:relative;z-index:1}
+.step{display:none}
+.step.active{display:block;animation:fade .35s ease both}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.rise{animation:rise .65s cubic-bezier(.2,.8,.2,1) backwards;animation-delay:calc(var(--i,0)*55ms)}
+@keyframes rise{from{opacity:0;transform:translate(calc(var(--dx,0)*var(--shift,30px)),16px)}to{opacity:1;transform:none}}
+@media (max-width:640px){.rise{--shift:10px}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+.kicker{font:500 12px/16px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--verm)}
+h1{font:600 56px/60px var(--serif);letter-spacing:-.027em;margin:12px 0}
+h1 em{font-style:italic;color:var(--verm)}
+.sub{font-size:18px;line-height:28px;color:var(--muted);max-width:640px}
+.form{display:flex;flex-direction:column;gap:30px;margin-top:34px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.row.one{grid-template-columns:1fr}
+
+/* fields */
+.field{display:flex;flex-direction:column;gap:8px}
+.field>label,.lbl{font:500 14px/20px var(--sans)}
+.lbl .hint,.field .hint{font:500 12px/16px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-left:10px}
+.input{height:56px;padding:0 18px;border-radius:14px;border:1.5px solid var(--line);background:var(--surface);width:100%;transition:border-color .15s,box-shadow .15s}
+textarea.input{height:112px;padding:16px 18px;resize:vertical}
+select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%232B1A16' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 16px center;padding-right:46px}
+.input::placeholder{color:var(--muted)}
+.input:hover{border-color:#cdb99f}
+.input:focus{outline:none;border-color:var(--verm);box-shadow:0 0 0 3px rgba(217,67,43,.14)}
+.field.err .input{border-color:var(--verm-deep);background:#FFF6F2}
+.msg{display:none;font:500 13px/18px var(--sans);color:var(--verm-deep)}
+.field.err .msg,.err-box.err .msg{display:block;animation:bump .35s ease}
+
+/* category cards */
+.cats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.cat{position:relative;text-align:left;min-height:172px;padding:22px 24px 24px;border-radius:24px;border:1.5px solid var(--line);background:var(--surface);display:flex;flex-direction:column;justify-content:space-between;transition:transform .2s,background .2s,border-color .2s}
+.cat:hover{transform:translateY(-3px);border-color:#cdb99f}
+.cat .n{font:500 12px var(--mono);color:var(--muted)}
+.cat h3{font:600 26px/32px var(--serif);letter-spacing:-.02em}
+.cat p{color:var(--muted);font-size:15px;line-height:22px;margin-top:6px}
+.cat .ind{position:absolute;right:22px;top:20px;width:30px;height:30px;border-radius:50%;border:1.5px solid var(--line);display:grid;place-items:center}
+.cat .ind svg{opacity:0;width:16px;height:16px}
+.cat[aria-checked=true]{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.cat[aria-checked=true] .n,.cat[aria-checked=true] p{color:var(--apricot)}
+.cat[aria-checked=true] .ind{background:var(--verm);border-color:var(--verm)}
+.cat[aria-checked=true] .ind svg{opacity:1}
+.err-box.err .cats .cat:not([aria-checked=true]){border-color:var(--verm-deep)}
+
+/* chips */
+.chips{display:flex;flex-wrap:wrap;gap:10px}
+.chip{display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 20px;border-radius:22px;border:1.5px solid var(--line);background:var(--surface);font:500 14px var(--sans);transition:background .15s,transform .15s,border-color .15s}
+.chip:hover{border-color:#cdb99f;transform:translateY(-1px)}
+.chip svg{display:none;width:16px;height:16px}
+.chip[aria-pressed=true],.chip[aria-checked=true]{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.chip[aria-pressed=true] svg,.chip[aria-checked=true] svg{display:block}
+.chip.add{border-style:dashed;color:var(--muted)}
+.chip-input{height:44px;border-radius:22px;border:1.5px dashed var(--line);background:transparent;padding:0 18px;width:170px;font:500 14px var(--sans)}
+.chip-input:focus{outline:none;border-color:var(--verm)}
+
+/* counter */
+.counter{display:flex;align-items:center;gap:6px}
+.counter .b{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;border:1.5px solid var(--line);background:var(--surface);transition:transform .15s}
+.counter .b.plus{background:var(--ink);border-color:var(--ink)}
+.counter .b:active{transform:scale(.92)}
+.counter .v{width:72px;text-align:center;font:600 26px var(--serif)}
+.counter .u{color:var(--muted);margin-left:8px}
+.counter svg{width:22px;height:22px}
+
+/* budget */
+.budget .val{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+.budget .val strong{font:600 40px/46px var(--serif);letter-spacing:-.025em}
+.budget .val span{font:500 12px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.range{position:relative;height:32px;margin-top:14px}
+.range .base,.range .fill{position:absolute;top:12px;height:8px;border-radius:4px}
+.range .base{left:0;right:0;background:var(--line)}
+.range .fill{background:var(--verm)}
+.range input{position:absolute;inset:0;width:100%;height:32px;margin:0;appearance:none;background:none;pointer-events:none}
+.range input::-webkit-slider-thumb{appearance:none;pointer-events:auto;width:32px;height:32px;border-radius:50%;background:var(--surface);border:3px solid var(--verm);box-shadow:0 4px 8px rgba(43,26,22,.2);cursor:grab}
+.range input::-moz-range-thumb{pointer-events:auto;width:26px;height:26px;border-radius:50%;background:var(--surface);border:3px solid var(--verm);box-shadow:0 4px 8px rgba(43,26,22,.2);cursor:grab}
+.range input::-webkit-slider-runnable-track{background:none}
+.range input::-moz-range-track{background:none}
+.scale{display:flex;justify-content:space-between;margin-top:10px;font:500 12px var(--mono);letter-spacing:.06em;color:var(--muted)}
+
+/* buttons */
+.actions{display:flex;align-items:center;gap:12px;margin-top:38px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:16px;height:56px;border-radius:32px;font:600 16px var(--sans);transition:transform .15s,background .15s,box-shadow .15s}
+.btn.primary{background:var(--verm);color:#fff;padding:0 8px 0 30px}
+.btn.primary .arr{width:40px;height:40px;border-radius:50%;background:var(--paper);display:grid;place-items:center;transition:transform .2s}
+.btn.primary:hover{background:var(--verm-deep);box-shadow:0 10px 24px -8px rgba(177,52,32,.6)}
+.btn.primary:hover .arr{transform:translateX(3px)}
+.btn.primary:active{transform:scale(.98)}
+.btn.sec{padding:0 30px;border:1.5px solid var(--ink)}
+.btn.sec:hover{background:var(--ink);color:var(--paper)}
+.btn.ghost{padding:0 20px 0 12px;gap:10px}
+.btn.ghost:hover{background:rgba(43,26,22,.06)}
+.btn svg{width:20px;height:20px}
+.hint-time{font:500 12px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-left:8px}
+.reassure{display:flex;gap:28px;flex-wrap:wrap;font:500 14px var(--sans)}
+.reassure span{display:flex;align-items:center;gap:8px}
+.reassure i{width:8px;height:8px;border-radius:50%;background:var(--verm)}
+.consent{display:flex;gap:12px;align-items:center;color:var(--muted);cursor:pointer}
+.consent input{position:absolute;opacity:0}
+.consent .box{width:24px;height:24px;border-radius:8px;border:1.5px solid var(--line);background:var(--surface);display:grid;place-items:center;flex:none}
+.consent .box svg{width:16px;height:16px;opacity:0}
+.consent input:checked+.box{background:var(--ink);border-color:var(--ink)} .consent input:checked+.box svg{opacity:1}
+.consent input:focus-visible+.box{outline:3px solid var(--verm);outline-offset:3px}
+.err-box.err .consent .box{border-color:var(--verm-deep)}
+.note{display:none;background:var(--apricot-soft);border:1.5px solid var(--apricot);border-radius:14px;padding:12px 16px;font-size:14px;line-height:20px;margin-top:12px}
+.note.show{display:block}
+
+/* ticket */
+.ticket-wrap{align-self:start;position:sticky;top:24px;padding-top:30px}
+.ticket{position:relative;width:100%;max-width:440px;background:var(--ink);color:var(--paper);border-radius:28px;transform:rotate(-1.5deg) perspective(1000px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));box-shadow:0 28px 56px -14px rgba(43,26,22,.38);overflow:hidden;transition:transform .35s ease-out;animation:tkIn .95s cubic-bezier(.2,.9,.3,1.1) .2s backwards}
+.ticket.pop{animation:pop .6s cubic-bezier(.2,.9,.3,1.2)}
+@keyframes pop{0%{transform:rotate(-1.5deg) scale(.96)}60%{transform:rotate(1deg) scale(1.02)}100%{transform:rotate(-1.5deg) scale(1)}}
+.ticket .tp{padding:32px 32px 18px}
+.tk-top{display:flex;justify-content:space-between;font:500 12px/16px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--apricot);gap:10px}
+.tk-title{font:600 40px/46px var(--serif);letter-spacing:-.025em;margin:22px 0 26px;word-break:break-word;min-height:46px}
+.tk-title.empty{opacity:.42}
+.tk-row{display:flex;gap:12px;padding:13px 0;border-bottom:1px solid var(--tline)}
+.tk-row dt{flex:0 0 78px;font:500 12px/20px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--apricot)}
+.tk-row dd{margin:0;flex:1;transition:opacity .2s}
+.tk-row dd.empty{opacity:.45}
+.tk-perf{position:relative;border-top:1.5px dashed var(--tline-strong);margin:0 32px}
+.tk-perf::before,.tk-perf::after{content:"";position:absolute;top:-15px;width:30px;height:30px;border-radius:50%;background:var(--paper)}
+.tk-perf::before{left:-47px}.tk-perf::after{right:-47px}
+.tk-bot{display:flex;justify-content:space-between;align-items:center;padding:30px 32px 32px;gap:12px}
+.barcode{display:flex;gap:3px;height:64px;align-items:stretch}
+.barcode b{display:block;background:var(--paper);opacity:.9}
+.tk-ref{font:500 12px/16px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--apricot);margin-top:12px}
+.stamp{width:104px;height:104px;border-radius:50%;border:2.5px solid var(--verm);color:var(--verm);display:grid;place-items:center;transform:rotate(12deg);font:500 12px var(--mono);letter-spacing:.08em;text-transform:uppercase;flex:none;transition:color .3s,border-color .3s}
+.stamp.moss{color:#8FC49E;border-color:#8FC49E}
+
+/* success */
+.pill{display:inline-flex;align-items:center;gap:8px;background:var(--moss);color:#fff;border-radius:20px;padding:8px 16px 8px 14px;font:500 12px var(--mono);letter-spacing:.08em;text-transform:uppercase}
+.pill i{width:8px;height:8px;border-radius:50%;background:#fff}
+.next{margin-top:34px}
+.next>b{display:block;font:500 12px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:18px}
+.next ol{list-style:none;padding:0}
+.next li{display:flex;gap:20px;padding-bottom:14px;position:relative}
+.next li::before{content:"";position:absolute;left:16px;top:40px;bottom:6px;width:2px;background:var(--line);border-radius:1px}
+.next li:last-child::before{display:none}
+.next li .nn{width:34px;height:34px;border-radius:50%;border:1.5px solid var(--line);display:grid;place-items:center;font:500 12px var(--mono);color:var(--muted);flex:none;background:var(--paper)}
+.next li:first-child .nn{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.next h4{font:600 20px/26px var(--serif)}
+.next p{color:var(--muted)}
+.mail{margin-top:22px;color:var(--muted)} .mail b{color:var(--ink);font-weight:500}
+
+footer{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:0 64px 26px;font:500 12px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+footer a{color:var(--muted);text-transform:none;letter-spacing:0;font:500 14px var(--sans)}
+
+/* motion */
+@keyframes tkIn{from{opacity:0;transform:translateY(60px) rotate(6deg) scale(.94)}}
+.ticket.nudge{animation:nudge .6s cubic-bezier(.2,.9,.3,1.3)}
+@keyframes nudge{0%{transform:rotate(-1.5deg)}40%{transform:rotate(-1.5deg) translateY(-12px) scale(1.01)}100%{transform:rotate(-1.5deg)}}
+.ticket::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:linear-gradient(112deg,transparent 30%,rgba(255,255,255,.22) 44%,rgba(255,226,190,.42) 50%,rgba(255,255,255,.18) 56%,transparent 70%);transform:translateX(-130%)}
+.ticket.shine{animation:lift 1.5s cubic-bezier(.25,.9,.3,1.1)}
+.ticket.shine::after{animation:sheen 1.2s ease-in-out .3s}
+@keyframes lift{0%{transform:rotate(-1.5deg) scale(1);box-shadow:0 28px 56px -14px rgba(43,26,22,.38)}38%{transform:rotate(0deg) translateY(-22px) scale(1.07);box-shadow:0 54px 80px -18px rgba(43,26,22,.5)}100%{transform:rotate(-1.5deg) scale(1);box-shadow:0 28px 56px -14px rgba(43,26,22,.38)}}
+@keyframes sheen{from{transform:translateX(-130%)}to{transform:translateX(130%)}}
+.bump{animation:bump .5s cubic-bezier(.2,.8,.2,1)}
+@keyframes bump{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.stamp.stampin{animation:stampin .55s cubic-bezier(.2,.9,.3,1.4)}
+@keyframes stampin{from{transform:rotate(12deg) scale(1.8);opacity:0}to{transform:rotate(12deg) scale(1);opacity:1}}
+.chip.pop{animation:chipPop .4s cubic-bezier(.2,.9,.3,1.5)}
+@keyframes chipPop{0%{transform:scale(.88)}60%{transform:scale(1.07)}100%{transform:scale(1)}}
+.cat[aria-checked=true] .ind svg{animation:chk .45s cubic-bezier(.2,.9,.3,1.6)}
+@keyframes chk{from{transform:scale(0) rotate(-40deg)}to{transform:none}}
+.cat[aria-checked=true]{animation:catPop .45s cubic-bezier(.2,.9,.3,1.4)}
+@keyframes catPop{0%{transform:scale(.97)}60%{transform:scale(1.025)}100%{transform:scale(1)}}
+.counter .v.tick{animation:tick .32s cubic-bezier(.2,.9,.3,1.3)}
+@keyframes tick{from{opacity:0;transform:translateY(10px) scale(.8)}to{opacity:1;transform:none}}
+.stepper li.now .dot{animation:dotin .6s cubic-bezier(.2,.9,.3,1.5)}
+@keyframes dotin{from{transform:scale(.4);opacity:.4}to{transform:none;opacity:1}}
+.field.err .input,.err-box.err .chips,.err-box.err .cats,.err-box.err .consent{animation:shake .45s}
+@keyframes shake{20%{transform:translateX(-7px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(3px)}}
+.logo i{animation:breathe 3.2s ease-in-out infinite}
+@keyframes breathe{50%{transform:scale(1.35);opacity:.8}}
+
+/* calendar */
+.datefield{position:relative}
+.row:has(.datefield){position:relative;z-index:40}
+.datebtn{display:flex;align-items:center;justify-content:space-between;gap:12px;text-align:left;cursor:pointer}
+.datebtn .ph{color:var(--muted)}
+.datebtn svg{width:20px;height:20px;flex:none}
+.datebtn[aria-expanded=true]{border-color:var(--verm);box-shadow:0 0 0 3px rgba(217,67,43,.14)}
+.cal{position:absolute;z-index:30;top:92px;left:0;width:min(392px,calc(100vw - 56px));background:var(--surface);border:1.5px solid var(--line);border-radius:28px;padding:22px 22px 18px;box-shadow:0 32px 64px -16px rgba(43,26,22,.35);opacity:0;transform:translateY(-10px) scale(.96);transform-origin:20% 0;pointer-events:none;transition:opacity .2s ease,transform .32s cubic-bezier(.2,.9,.3,1.2)}
+.cal[hidden]{display:none}
+.cal.show{opacity:1;transform:none;pointer-events:auto}
+.cal-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.cal-title{font:600 22px/28px var(--serif);letter-spacing:-.02em}
+.cal-title em{font-style:italic;color:var(--verm)}
+.cal-nav{width:40px;height:40px;border-radius:50%;border:1.5px solid var(--line);display:grid;place-items:center;transition:background .15s,color .15s,transform .15s}
+.cal-nav:hover:not(:disabled){background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.cal-nav:active:not(:disabled){transform:scale(.9)}
+.cal-nav:disabled{opacity:.3;cursor:default}
+.cal-nav svg{width:18px;height:18px}
+.cal-wd,.cal-grid{display:grid;grid-template-columns:repeat(7,1fr)}
+.cal-wd span{text-align:center;font:500 11px/24px var(--mono);letter-spacing:.08em;color:var(--muted)}
+.cal-grid{overflow:hidden}
+.cal-grid.fwd{animation:mfwd .38s cubic-bezier(.2,.8,.2,1)}
+.cal-grid.bwd{animation:mbwd .38s cubic-bezier(.2,.8,.2,1)}
+@keyframes mfwd{from{opacity:0;transform:translateX(26px)}to{opacity:1;transform:none}}
+@keyframes mbwd{from{opacity:0;transform:translateX(-26px)}to{opacity:1;transform:none}}
+.day{position:relative;height:44px;padding:0;min-width:0;display:grid;place-items:center;font:500 15px var(--sans);color:var(--ink)}
+.day span{position:relative;z-index:1;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;transition:background .18s,color .18s,transform .18s cubic-bezier(.2,.9,.3,1.5)}
+button.day:hover:not(:disabled):not(.sel) span{background:var(--apricot-soft);transform:scale(1.08)}
+button.day:active:not(:disabled) span{transform:scale(.9)}
+.day:disabled{color:var(--line);cursor:default}
+.day.today span{box-shadow:inset 0 0 0 1.5px var(--verm)}
+.day.sel span{background:var(--ink);color:var(--paper);box-shadow:none}
+.day.in::before,.day.rs::before,.day.re::before,.day.pv::before{content:"";position:absolute;top:2px;bottom:2px;left:0;right:0;background:var(--apricot-soft);animation:band .3s ease}
+@keyframes band{from{opacity:0}}
+.day.rs::before{left:50%}.day.re::before{right:50%}
+.day.pv::before{background:repeating-linear-gradient(90deg,var(--apricot-soft) 0 6px,transparent 6px 9px)}
+.day.in:nth-child(7n+1)::before{border-radius:20px 0 0 20px}.day.in:nth-child(7n)::before{border-radius:0 20px 20px 0}
+.cal-f{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:14px;padding-top:14px;border-top:1.5px dashed var(--line)}
+.cal-hint{font:500 11px/16px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);max-width:170px}
+.cal-f>div{display:flex;gap:6px}
+.cal-clear,.cal-done{height:40px;padding:0 18px;border-radius:20px;font:600 14px var(--sans);transition:background .15s,transform .15s}
+.cal-done{background:var(--ink);color:var(--paper)}.cal-done:hover{background:var(--verm)}
+.cal-clear:hover{background:rgba(43,26,22,.06)}
+.cal-done:active,.cal-clear:active{transform:scale(.95)}
+.field.err .datebtn{border-color:var(--verm-deep);background:#FFF6F2}
+
+/* confetti */
+.cf{position:fixed;top:-12px;width:10px;height:14px;border-radius:2px;z-index:50;pointer-events:none;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(105vh) rotate(720deg);opacity:.9}}
+
+.cal-back{display:none}
+@media (max-width:1100px){
+  .stage{grid-template-columns:1fr;gap:28px;padding:28px 28px 40px}
+  .top,.stepper{padding-left:28px;padding-right:28px} footer{padding:0 28px 26px}
+  .ticket-wrap{position:static;padding-top:0;order:2;display:flex;justify-content:center}.glow{display:none}
+  .ticket{max-width:440px}.col{z-index:2}
+}
+@media (max-width:640px){
+  .top{padding:20px 20px 0}.stepper{padding:20px 20px 0}.stage{padding:18px 20px 28px;gap:24px}footer{padding:0 20px 22px;flex-direction:column;gap:6px}
+  h1{font-size:40px;line-height:44px;margin:10px 0}.sub{font-size:16px;line-height:24px}
+  .form{gap:26px;margin-top:26px}.row{grid-template-columns:1fr}.cats{grid-template-columns:1fr}.cat{min-height:132px;padding:18px 20px 20px}
+  .stepper li span.t{display:none}.stepper li.now span.t{display:inline}.stepper .perf{width:18px}.stepper{gap:8px}
+  .budget .val strong{font-size:28px;line-height:34px}.chip{height:46px}
+  .counter .b{width:56px;height:56px}
+  /* pinned action bar */
+  .actions{position:sticky;bottom:0;z-index:20;margin:26px -20px 0;padding:16px 20px calc(16px + env(safe-area-inset-bottom));background:linear-gradient(to bottom,rgba(247,240,230,0),var(--paper) 30%);gap:8px;flex-wrap:nowrap}
+  .actions .btn.primary{flex:1;justify-content:space-between;padding-left:24px;gap:10px;white-space:nowrap}
+  .actions .btn.ghost{font-size:0;gap:0;width:56px;padding:0;justify-content:center;border:1.5px solid var(--line);background:var(--surface);flex:none}
+  .hint-time{display:none}
+  .step[data-step="5"] .actions{position:static;flex-direction:column;align-items:stretch;background:none;margin:26px 0 0;padding:0;gap:12px}
+  .step[data-step="5"] .actions .btn{justify-content:center;width:100%}
+  .step[data-step="5"] .actions .btn.primary{justify-content:space-between}
+  /* calendar becomes a bottom sheet */
+  .cal-back{display:block;position:fixed;inset:0;z-index:1;background:rgba(43,26,22,.42);opacity:0;pointer-events:none;transition:opacity .25s}
+  .cal-back.show{opacity:1;pointer-events:auto}
+  .cal{position:fixed;z-index:2;left:12px;right:12px;top:auto;bottom:calc(12px + env(safe-area-inset-bottom));width:auto;max-height:88vh;overflow:auto;transform:translateY(48px);transform-origin:bottom center}
+  .cal.show{transform:none}
+  .day{height:46px}.day span{width:42px;height:42px}
+  /* ticket */
+  .ticket .tp{padding:24px 22px 12px}.tk-title{font-size:30px;line-height:36px;margin:16px 0 18px}
+  .tk-row dt{flex-basis:66px}
+  .tk-perf{margin:0 22px}.tk-perf::before{left:-37px}.tk-perf::after{right:-37px}
+  .tk-bot{padding:22px 22px 24px}.stamp{width:84px;height:84px}
+  .barcode b:nth-child(n+19){display:none}
+  /* success: heading, then ticket, then next steps */
+  body[data-step="5"] .col,body[data-step="5"] .step[data-step="5"]{display:contents}
+  body[data-step="5"] .ok-head{order:1}
+  body[data-step="5"] .ticket-wrap{order:2}
+  body[data-step="5"] .ok-rest{order:3}
+}
+@media (max-width:380px){h1{font-size:36px;line-height:40px}.btn.primary{padding-left:22px}.btn.ghost{padding:0 12px 0 6px}}
+@media (hover:none){.chip:hover,.cat:hover,button.day:hover span{transform:none}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+  <symbol id="i-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+  <symbol id="i-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></symbol>
+  <symbol id="i-minus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 12h12"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></symbol>
+</svg>
+
+<header class="top">
+  <a class="logo" href="#"><i></i>GoPratle</a>
+  <button class="link" id="saveExit" type="button">Save &amp; exit</button>
+</header>
+
+<nav aria-label="Progress"><ol class="stepper" id="stepper"></ol></nav>
+
+<main class="stage">
+  <div class="glow" aria-hidden="true"></div>
+  <section class="col">
+
+    <!-- STEP 1 -->
+    <form class="step active" data-step="1" novalidate>
+      <p class="kicker">Step 01 — The basics</p>
+      <h1>Let’s set <em>the stage.</em></h1>
+      <p class="sub">Tell us about your event. It takes about two minutes, and you can edit everything later.</p>
+      <div class="form">
+        <div class="row">
+          <div class="field" data-f="name"><label for="name">Event name</label>
+            <input class="input" id="name" autocomplete="off" placeholder="e.g. Aarav &amp; Meera’s Sangeet" required>
+            <span class="msg">Give your event a name so performers know what they’re joining.</span></div>
+          <div class="field" data-f="type"><label for="type">Event type</label>
+            <select class="input" id="type" required>
+              <option value="">Select event type</option><option>Wedding</option><option>Sangeet / Mehendi</option><option>Corporate event</option><option>Birthday party</option><option>Concert or festival</option><option>College fest</option><option>Private party</option><option>Other</option>
+            </select><span class="msg">Choose the closest event type.</span></div>
+        </div>
+        <div class="row">
+          <div class="field datefield" data-f="start"><label for="dateBtn">Date or date range</label>
+            <button type="button" class="input datebtn" id="dateBtn" aria-haspopup="dialog" aria-expanded="false" aria-controls="cal"><span id="dateTxt" class="ph">Select dates</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="3.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg></button>
+            <input type="hidden" id="start"><input type="hidden" id="end">
+            <span class="msg">Choose when your event happens.</span>
+            <div class="cal-back" id="calBack"></div>
+            <div class="cal" id="cal" role="dialog" aria-label="Choose event dates" hidden></div></div>
+          <div class="field" data-f="loc"><label for="loc">Location</label>
+            <input class="input" id="loc" autocomplete="off" placeholder="City or area, e.g. Jaipur" required><span class="msg">Add the city so we can find nearby talent.</span></div>
+        </div>
+        <div class="row one">
+          <div class="field"><label for="venue">Venue details <span class="hint">Optional</span></label>
+            <input class="input" id="venue" autocomplete="off" placeholder="Hotel, banquet hall or farmhouse, if you already know it"></div>
+        </div>
+        <div class="err-box" data-f="cat">
+          <p class="lbl" id="catlbl">What are you hiring for? <span class="hint">Pick one to start</span></p>
+          <div class="cats" role="radiogroup" aria-labelledby="catlbl" style="margin-top:12px">
+            <button type="button" class="cat" role="radio" aria-checked="false" data-v="Event Planner"><span class="n">01</span><span class="ind"><svg><use href="#i-check"/></svg></span><span><h3>Event Planner</h3><p>Coordinators who run the show from start to finish</p></span></button>
+            <button type="button" class="cat" role="radio" aria-checked="false" data-v="Performer"><span class="n">02</span><span class="ind"><svg><use href="#i-check"/></svg></span><span><h3>Performer</h3><p>Bands, DJs, dancers, MCs and more</p></span></button>
+            <button type="button" class="cat" role="radio" aria-checked="false" data-v="Crew"><span class="n">03</span><span class="ind"><svg><use href="#i-check"/></svg></span><span><h3>Crew</h3><p>Sound, lights, décor and on-ground hands</p></span></button>
+          </div>
+          <span class="msg" style="margin-top:8px">Pick what you’re hiring for to continue.</span>
+          <p class="note" id="catNote">The detailed questions in this prototype are built for <b>Performers</b>, so we’ll take you through that path.</p>
+        </div>
+      </div>
+      <div class="actions"><button class="btn primary" type="submit">Continue to the act <span class="arr"><svg style="color:var(--verm)"><use href="#i-right"/></svg></span></button><span class="hint-time">Takes about 2 minutes</span></div>
+    </form>
+
+    <!-- STEP 2 -->
+    <form class="step" data-step="2" novalidate>
+      <p class="kicker">Step 02 — The act</p>
+      <h1>Who’s on <em>stage?</em></h1>
+      <p class="sub">Tell us what kind of performer you have in mind. Pick as many as you like.</p>
+      <div class="form">
+        <div class="err-box" data-f="acts"><p class="lbl">Type of performer <span class="hint">Pick all that apply</span></p>
+          <div class="chips" id="acts" style="margin-top:12px"></div><span class="msg" style="margin-top:8px">Select at least one type of performer.</span></div>
+        <div><p class="lbl">Style or genre <span class="hint">Helps us match the vibe</span></p><div class="chips" id="genres" style="margin-top:12px"></div></div>
+        <div><p class="lbl" id="cntlbl">How many performers? <span class="hint">Solo? Set it to 1</span></p>
+          <div class="counter" id="cPerf" style="margin-top:12px"><button type="button" class="b minus" aria-label="Fewer performers"><svg><use href="#i-minus"/></svg></button><span class="v" aria-live="polite">4</span><button type="button" class="b plus" aria-label="More performers" style="color:var(--paper)"><svg><use href="#i-plus"/></svg></button><span class="u">performers</span></div></div>
+      </div>
+      <div class="actions"><button class="btn ghost" type="button" data-back><svg><use href="#i-left"/></svg>Back</button><button class="btn primary" type="submit">Continue to the brief <span class="arr"><svg style="color:var(--verm)"><use href="#i-right"/></svg></span></button></div>
+    </form>
+
+    <!-- STEP 3 -->
+    <form class="step" data-step="3" novalidate>
+      <p class="kicker">Step 03 — The brief</p>
+      <h1>Now, the <em>details.</em></h1>
+      <p class="sub">Set the scene: how long they perform, how many sets, and what you would like to spend.</p>
+      <div class="form">
+        <div class="row">
+          <div class="err-box" data-f="dur"><p class="lbl">Performance duration</p><div class="chips" id="dur" role="radiogroup" aria-label="Performance duration" style="margin-top:12px"></div><span class="msg" style="margin-top:8px">Choose how long they’ll perform.</span></div>
+          <div><p class="lbl">Number of sets</p><div class="counter" id="cSets" style="margin-top:12px"><button type="button" class="b minus" aria-label="Fewer sets"><svg><use href="#i-minus"/></svg></button><span class="v" aria-live="polite">2</span><button type="button" class="b plus" aria-label="More sets" style="color:var(--paper)"><svg><use href="#i-plus"/></svg></button><span class="u">sets</span></div></div>
+        </div>
+        <div class="budget"><p class="lbl">Total budget <span class="hint">For the whole program, not per act</span></p>
+          <div class="val" style="margin-top:10px"><strong id="bval">₹60,000 – ₹1,50,000</strong><span>total · whole program</span></div>
+          <div class="range"><div class="base"></div><div class="fill" id="bfill"></div>
+            <input type="range" id="bmin" min="10000" max="500000" step="10000" value="60000" aria-label="Minimum total budget for the whole program">
+            <input type="range" id="bmax" min="10000" max="500000" step="10000" value="150000" aria-label="Maximum total budget for the whole program"></div>
+          <div class="scale"><span>₹10K</span><span>₹1L</span><span>₹2.5L</span><span>₹5L+</span></div></div>
+        <div class="field"><label for="extra">Additional requirements <span class="hint">Optional</span></label>
+          <textarea class="input" id="extra" placeholder="Sound setup, dress code, language, songs to play or avoid…"></textarea></div>
+      </div>
+      <div class="actions"><button class="btn ghost" type="button" data-back><svg><use href="#i-left"/></svg>Back</button><button class="btn primary" type="submit">Continue to contact <span class="arr"><svg style="color:var(--verm)"><use href="#i-right"/></svg></span></button></div>
+    </form>
+
+    <!-- STEP 4 -->
+    <form class="step" data-step="4" novalidate>
+      <p class="kicker">Step 04 — Contact</p>
+      <h1>Who’s <em>hosting?</em></h1>
+      <p class="sub">Performers will reply to these details. We never share them without your say-so.</p>
+      <div class="form">
+        <div class="row">
+          <div class="field" data-f="hname"><label for="hname">Full name</label><input class="input" id="hname" autocomplete="name" placeholder="Your name"><span class="msg">Add your name so performers know who to address.</span></div>
+          <div class="field" data-f="email"><label for="email">Email address</label><input class="input" id="email" type="email" autocomplete="email" placeholder="you@example.com"><span class="msg">Enter a valid email, like name@example.com.</span></div>
+        </div>
+        <div class="row">
+          <div class="field" data-f="phone"><label for="phone">Phone number</label><input class="input" id="phone" type="tel" autocomplete="tel" placeholder="+91 98765 43210"><span class="msg">Enter a phone number with at least 10 digits.</span></div>
+          <div class="field"><label for="company">Company name <span class="hint">Optional</span></label><input class="input" id="company" autocomplete="organization" placeholder="Your company or agency"></div>
+        </div>
+        <div class="reassure"><span><i></i>Free to post</span><span><i></i>First proposals within 24 hours</span><span><i></i>Your details stay private</span></div>
+        <div class="err-box" data-f="consent"><label class="consent"><input type="checkbox" id="consent"><span class="box"><svg style="color:var(--paper)"><use href="#i-check"/></svg></span><span>I agree to GoPratle’s terms and privacy policy</span></label><span class="msg" style="margin-top:8px">Please accept the terms to post your requirement.</span></div>
+      </div>
+      <div class="actions"><button class="btn ghost" type="button" data-back><svg><use href="#i-left"/></svg>Back</button><button class="btn primary" type="submit">Post my requirement <span class="arr"><svg style="color:var(--verm)"><use href="#i-right"/></svg></span></button></div>
+    </form>
+
+    <!-- STEP 5 -->
+    <section class="step" data-step="5" aria-live="polite">
+      <div class="ok-head">
+      <span class="pill"><i></i><span id="okRef">Posted</span></span>
+      <h1 style="margin-top:16px">Your requirement is <em>live.</em></h1>
+      <p class="sub" id="okSub"></p>
+      </div>
+      <div class="ok-rest">
+      <div class="next"><b>What happens next</b>
+        <ol>
+          <li><span class="nn">1</span><div><h4>We review your post</h4><p>A quick check from our team, then your post goes live to performers.</p></div></li>
+          <li><span class="nn">2</span><div><h4>Performers send proposals</h4><p>Verified acts reply with quotes and availability. Expect the first within 24 hours.</p></div></li>
+          <li><span class="nn">3</span><div><h4>You compare and book</h4><p>Shortlist, chat and confirm, all in one place.</p></div></li>
+        </ol></div>
+      <div class="actions"><button class="btn primary" type="button" id="viewReq">View my requirement <span class="arr"><svg style="color:var(--verm)"><use href="#i-right"/></svg></span></button><button class="btn sec" type="button" id="another">Post another</button></div>
+      <p class="mail">A copy of this ticket is on its way to <b id="okMail"></b></p>
+      </div>
+    </section>
+  </section>
+
+  <aside class="ticket-wrap" aria-label="Your requirement summary">
+    <div class="ticket" id="ticket">
+      <div class="tp">
+        <div class="tk-top"><span>Admit one</span><span>GoPratle · Requirement</span></div>
+        <div class="tk-title empty" id="tTitle">Your event name</div>
+        <dl style="margin:0">
+          <div class="tk-row"><dt>When</dt><dd id="tWhen" class="empty">Pick a date</dd></div>
+          <div class="tk-row"><dt>Where</dt><dd id="tWhere" class="empty">Add a city</dd></div>
+          <div class="tk-row"><dt>Hiring</dt><dd id="tHiring" class="empty">Choose a category</dd></div>
+          <div class="tk-row"><dt>The act</dt><dd id="tAct" class="empty">Not chosen yet</dd></div>
+          <div class="tk-row"><dt>Budget</dt><dd id="tBudget" class="empty">Not set yet</dd></div>
+        </dl>
+      </div>
+      <div class="tk-perf" aria-hidden="true"></div>
+      <div class="tk-bot"><div><div class="barcode" id="barcode" aria-hidden="true"></div><div class="tk-ref" id="tRef">GP — REF 000 000</div></div><div class="stamp" id="stamp">Draft</div></div>
+    </div>
+  </aside>
+</main>
+
+<footer><span>Secure &amp; private · Verified performers only</span><a href="mailto:hello@gopratle.com">Need help? hello@gopratle.com</a></footer>
+
+<script>
+(() => {
+  const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const state = { step: 1, cat: '', acts: new Set(), genres: new Set(), perf: 4, sets: 2, dur: '', ref: '000 000' };
+  const STEPS = ['Basics', 'The Act', 'The Brief', 'Contact'];
+  const ACTS = ['Live band', 'DJ', 'Solo singer', 'Dancers', 'Anchor / MC', 'Instrumentalist', 'Magician', 'Stand-up comic', 'Folk artists'];
+  const GENRES = ['Bollywood', 'Sufi', 'Retro', 'Classical', 'EDM', 'Jazz', 'Rock', 'Pop'];
+  const DURS = ['30 min', '45 min', '1 hour', '90 min', '2 hrs+'];
+  const check = '<svg><use href="#i-check"/></svg>';
+  const inr = n => '₹' + Number(n).toLocaleString('en-IN');
+  const fmtDate = v => v ? new Date(v + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+
+  /* ---- stepper ---- */
+  function drawStepper() {
+    const el = $('#stepper'); el.classList.toggle('hidden', state.step === 5);
+    el.innerHTML = STEPS.map((t, i) => {
+      const n = i + 1, cls = n < state.step ? 'done' : n === state.step ? 'now' : '';
+      const dot = n < state.step ? '<svg width="16" height="16"><use href="#i-check"/></svg>' : n;
+      const inner = `<span class="dot">${dot}</span><span class="t">${t}</span>`;
+      const body = n < state.step ? `<button type="button" class="stp" data-go="${n}" aria-label="Go back to ${t}">${inner}</button>` : inner;
+      return `<li class="${cls}" ${n === state.step ? 'aria-current="step"' : ''}>${body}</li>${n < 4 ? '<li class="perf" aria-hidden="true" style="padding:0"></li>' : ''}`;
+    }).join('');
+    $$('[data-go]').forEach(b => b.onclick = () => go(+b.dataset.go));
+  }
+  function go(n) {
+    const dir = n >= state.step ? 1 : -1; state.step = n;
+    $('.col').style.setProperty('--dx', dir);
+    $$('.step').forEach(s => s.classList.toggle('active', +s.dataset.step === n));
+    document.body.dataset.step = n;
+    clearTimeout(shineT); $('#ticket').classList.remove('shine');
+    drawStepper(); updateTicket(); nudge();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    const first = $(`.step[data-step="${n}"] h1`); if (first) { first.setAttribute('tabindex', '-1'); first.focus({ preventScroll: true }); }
+  }
+
+  /* ---- ticket ---- */
+  let inited = false, shineT = 0;
+  const retrigger = (el, cls) => { el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); };
+  function setRow(id, text, placeholder) { const e = $(id), v = text || placeholder, changed = e.textContent !== v; e.textContent = v; e.classList.toggle('empty', !text); if (changed && inited) retrigger(e, 'bump'); }
+  function nudge() { if (!inited) return; const t = $('#ticket'); t.classList.remove('pop', 'nudge'); void t.offsetWidth; t.classList.add('nudge'); }
+  function updateTicket() {
+    const name = $('#name').value.trim();
+    const t = $('#tTitle'), tv = name || 'Your event name'; if (inited && t.textContent !== tv && name) retrigger(t, 'bump'); t.textContent = tv; t.classList.toggle('empty', !name);
+    const s = $('#start').value, e = $('#end').value;
+    setRow('#tWhen', s ? (e && e !== s ? `${fmtDate(s)} – ${fmtDate(e)}` : fmtDate(s)) : '', 'Pick a date');
+    const loc = $('#loc').value.trim(), ven = $('#venue').value.trim();
+    setRow('#tWhere', loc ? (ven ? `${ven}, ${loc}` : loc) : '', 'Add a city');
+    setRow('#tHiring', state.cat, 'Choose a category');
+    const acts = [...state.acts];
+    const actTxt = acts.length ? `${acts.join(', ')} · ${state.perf} performer${state.perf > 1 ? 's' : ''}${state.step >= 3 && state.dur ? ` · ${state.sets} set${state.sets > 1 ? 's' : ''} of ${state.dur}` : ''}` : '';
+    setRow('#tAct', state.step >= 2 || acts.length ? actTxt : '', 'Not chosen yet');
+    setRow('#tBudget', state.step >= 3 ? `${inr($('#bmin').value)} – ${inr($('#bmax').value)} total` : '', 'Not set yet');
+    const st = $('#stamp'), sv = state.step === 5 ? 'Posted' : state.step === 4 ? 'Ready' : 'Draft'; if (inited && st.textContent !== sv) retrigger(st, 'stampin'); st.textContent = sv; st.classList.toggle('moss', state.step === 5);
+    $('#tRef').textContent = 'GP — REF ' + state.ref;
+  }
+  function drawBarcode(seed) {
+    let h = 0; for (const c of seed) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+    let out = ''; for (let i = 0; i < 26; i++) { h = (h * 1664525 + 1013904223) >>> 0; out += `<b style="width:${2 + (h >> 24) % 5}px"></b>`; }
+    $('#barcode').innerHTML = out;
+  }
+  drawBarcode('000 000');
+  $$('#name,#start,#end,#loc,#venue,#type').forEach(i => i.addEventListener('input', updateTicket));
+
+  /* ---- validation ---- */
+  const setErr = (key, bad) => { const el = $(`[data-f="${key}"]`); if (el) { el.classList.toggle('err', bad); const inp = $('input,select,textarea,button.cat', el); if (inp && ['INPUT', 'SELECT', 'TEXTAREA'].includes(inp.tagName)) inp.setAttribute('aria-invalid', bad); } return bad; };
+  function focusFirstError(form) { const e = $('.err', form); if (e) { const t = $('input,select,textarea,button', e); (t || e).focus(); } }
+  const validators = {
+    1: () => { const s = $('#start').value, e = $('#end').value;
+      const bad = [setErr('name', !$('#name').value.trim()), setErr('type', !$('#type').value), setErr('start', !s), setErr('end', !!(e && s && e < s)), setErr('loc', !$('#loc').value.trim()), setErr('cat', !state.cat)];
+      return !bad.some(Boolean); },
+    2: () => !setErr('acts', state.acts.size === 0),
+    3: () => !setErr('dur', !state.dur),
+    4: () => { const em = $('#email').value.trim(), ph = $('#phone').value.replace(/\D/g, '');
+      const bad = [setErr('hname', !$('#hname').value.trim()), setErr('email', !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(em)), setErr('phone', ph.length < 10), setErr('consent', !$('#consent').checked)];
+      return !bad.some(Boolean); }
+  };
+  $$('.input').forEach(i => i.addEventListener('input', () => { const f = i.closest('.field'); if (f) f.classList.remove('err'); }));
+  $('#consent').addEventListener('change', () => $('[data-f=consent]').classList.remove('err'));
+
+  /* ---- step 1 category ---- */
+  $$('.cat').forEach(b => b.addEventListener('click', () => {
+    state.cat = b.dataset.v; $$('.cat').forEach(x => x.setAttribute('aria-checked', x === b));
+    $('[data-f=cat]').classList.remove('err'); $('#catNote').classList.toggle('show', state.cat !== 'Performer'); updateTicket();
+  }));
+
+  /* ---- chips ---- */
+  function chips(sel, items, set, single) {
+    const box = $(sel);
+    const pop = t => { const n = $$('.chip', box).find(x => x.dataset.t === t); if (n) n.classList.add('pop'); };
+    const draw = () => { box.innerHTML = items.map(t => `<button type="button" class="chip" ${single ? 'role="radio" aria-checked' : 'aria-pressed'}="${single ? state.dur === t : set.has(t)}" data-t="${t}">${check}${t}</button>`).join('') + (sel === '#genres' ? '<input class="chip-input" id="addGenre" placeholder="+ Add your own" aria-label="Add your own genre">' : '');
+      $$('.chip', box).forEach(c => c.onclick = () => { const t = c.dataset.t;
+        if (single) state.dur = t; else set.has(t) ? set.delete(t) : set.add(t);
+        if (sel === '#acts') $('[data-f=acts]').classList.remove('err'); if (single) $('[data-f=dur]').classList.remove('err');
+        draw(); pop(t); updateTicket(); });
+      const add = $('#addGenre', box); if (add) add.onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); const v = add.value.trim(); if (v) { if (!items.includes(v)) items.push(v); set.add(v); draw(); $('#addGenre').focus(); } } };
+    }; draw();
+  }
+  chips('#acts', ACTS, state.acts); chips('#genres', GENRES, state.genres); chips('#dur', DURS, null, true);
+
+  /* ---- counters ---- */
+  function counter(id, key, min, max, unitOne, unitMany) {
+    const c = $(id), v = $('.v', c), u = $('.u', c);
+    const draw = () => { v.textContent = state[key]; u.textContent = state[key] === 1 ? unitOne : unitMany; if (inited) retrigger(v, 'tick'); };
+    $('.minus', c).onclick = () => { state[key] = Math.max(min, state[key] - 1); draw(); updateTicket(); };
+    $('.plus', c).onclick = () => { state[key] = Math.min(max, state[key] + 1); draw(); updateTicket(); };
+    draw();
+  }
+  counter('#cPerf', 'perf', 1, 30, 'performer', 'performers'); counter('#cSets', 'sets', 1, 10, 'set', 'sets');
+
+  /* ---- budget ---- */
+  const bmin = $('#bmin'), bmax = $('#bmax');
+  function budget(e) {
+    if (+bmin.value > +bmax.value) { if (e && e.target === bmin) bmin.value = bmax.value; else bmax.value = bmin.value; }
+    const lo = (bmin.value - 10000) / 490000 * 100, hi = (bmax.value - 10000) / 490000 * 100;
+    const f = $('#bfill'); f.style.left = lo + '%'; f.style.width = (hi - lo) + '%';
+    $('#bval').textContent = `${inr(bmin.value)} – ${inr(bmax.value)}${+bmax.value >= 500000 ? '+' : ''}`;
+    updateTicket();
+  }
+  bmin.addEventListener('input', budget); bmax.addEventListener('input', budget); budget();
+
+  /* ---- calendar ---- */
+  const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  const cal = $('#cal'), dbtn = $('#dateBtn'), dtxt = $('#dateTxt');
+  const D = { s: '', e: '', vy: 0, vm: 0 };
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const iso = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  const pd = s => new Date(s + 'T00:00:00');
+  const short = d => d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+  function dateLabel() {
+    if (!D.s) { dtxt.textContent = 'Select dates'; dtxt.className = 'ph'; return; }
+    dtxt.className = ''; const a = pd(D.s), b = D.e && D.e !== D.s ? pd(D.e) : null;
+    dtxt.textContent = !b ? fmtDate(D.s) : a.getFullYear() === b.getFullYear() ? `${short(a)} – ${short(b)} ${b.getFullYear()}` : `${fmtDate(D.s)} – ${fmtDate(D.e)}`;
+  }
+  function commit() {
+    $('#start').value = D.s; $('#end').value = D.e && D.e !== D.s ? D.e : '';
+    $('#start').dispatchEvent(new Event('input', { bubbles: true })); dateLabel();
+    if (D.s) $('[data-f=start]').classList.remove('err');
+  }
+  function drawCal(dir) {
+    const { vy, vm } = D, first = new Date(vy, vm, 1), days = new Date(vy, vm + 1, 0).getDate();
+    const canPrev = !(vy === today.getFullYear() && vm <= today.getMonth());
+    let cells = ''; for (let i = 0; i < first.getDay(); i++) cells += '<span class="day blank"></span>';
+    for (let d = 1; d <= days; d++) {
+      const dt = new Date(vy, vm, d), k = iso(dt), past = dt < today; let c = 'day';
+      if (+dt === +today) c += ' today';
+      if (D.s && k === D.s) c += ' sel' + (D.e && D.e !== D.s ? ' rs' : '');
+      if (D.e && k === D.e) c += ' sel' + (D.s && D.e !== D.s ? ' re' : '');
+      if (D.s && D.e && k > D.s && k < D.e) c += ' in';
+      const sel = k === D.s || k === D.e;
+      cells += `<button type="button" class="${c}" data-d="${k}" ${past ? 'disabled' : ''} aria-pressed="${sel}" aria-label="${dt.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}"><span>${d}</span></button>`;
+    }
+    const n = D.s && D.e ? Math.round((pd(D.e) - pd(D.s)) / 864e5) + 1 : 0;
+    const hint = !D.s ? 'Pick your first day' : !D.e ? 'Now pick the last day, or tap the same day' : `${n} day${n > 1 ? 's' : ''} selected`;
+    cal.innerHTML = `<div class="cal-h"><button type="button" class="cal-nav" data-nav="-1" aria-label="Previous month" ${canPrev ? '' : 'disabled'}><svg><use href="#i-left"/></svg></button><div class="cal-title" aria-live="polite">${MONTHS[vm]} <em>${vy}</em></div><button type="button" class="cal-nav" data-nav="1" aria-label="Next month"><svg><use href="#i-right"/></svg></button></div>` +
+      `<div class="cal-wd" aria-hidden="true">${['S', 'M', 'T', 'W', 'T', 'F', 'S'].map(x => `<span>${x}</span>`).join('')}</div>` +
+      `<div class="cal-grid ${dir > 0 ? 'fwd' : dir < 0 ? 'bwd' : ''}">${cells}</div>` +
+      `<div class="cal-f"><span class="cal-hint">${hint}</span><div><button type="button" class="cal-clear">Clear</button><button type="button" class="cal-done">Done</button></div></div>`;
+  }
+  function openCal() {
+    const b = D.s ? pd(D.s) : today; D.vy = b.getFullYear(); D.vm = b.getMonth(); drawCal(0);
+    cal.hidden = false; $('#calBack').classList.add('show'); dbtn.setAttribute('aria-expanded', 'true'); requestAnimationFrame(() => requestAnimationFrame(() => cal.classList.add('show')));
+    setTimeout(() => { const f = $('.day.sel, .day.today, .day:not(.blank):not(:disabled)', cal); if (f) f.focus({ preventScroll: true }); }, 60);
+  }
+  $('#calBack').addEventListener('click', () => closeCal(true));
+  function closeCal(ret) { if (cal.hidden) return; cal.classList.remove('show'); $('#calBack').classList.remove('show'); dbtn.setAttribute('aria-expanded', 'false'); setTimeout(() => { if (!cal.classList.contains('show')) cal.hidden = true; }, 220); if (ret) dbtn.focus(); }
+  dbtn.addEventListener('click', () => cal.hidden || !cal.classList.contains('show') ? openCal() : closeCal());
+  cal.addEventListener('click', e => {
+    const nav = e.target.closest('[data-nav]'), day = e.target.closest('.day[data-d]');
+    if (nav) { const dir = +nav.dataset.nav; const m = new Date(D.vy, D.vm + dir, 1); D.vy = m.getFullYear(); D.vm = m.getMonth(); drawCal(dir); const nb = $(`[data-nav="${dir}"]`, cal); if (nb && !nb.disabled) nb.focus(); return; }
+    if (day) { const k = day.dataset.d;
+      if (!D.s || D.e) { D.s = k; D.e = ''; } else if (k < D.s) { D.s = k; } else { D.e = k; }
+      commit(); drawCal(0); const again = $(`.day[data-d="${k}"]`, cal); if (again) again.focus({ preventScroll: true });
+      if (D.e) setTimeout(() => closeCal(true), 550); return; }
+    if (e.target.closest('.cal-clear')) { D.s = D.e = ''; commit(); drawCal(0); return; }
+    if (e.target.closest('.cal-done')) { if (D.s && !D.e) D.e = D.s; commit(); closeCal(true); }
+  });
+  cal.addEventListener('mouseover', e => {
+    const b = e.target.closest('.day[data-d]'); if (!b || !D.s || D.e) return; const h = b.dataset.d;
+    $$('.day[data-d]', cal).forEach(x => x.classList.toggle('pv', x.dataset.d > D.s && x.dataset.d <= h));
+  });
+  cal.addEventListener('mouseleave', () => $$('.day.pv', cal).forEach(x => x.classList.remove('pv')));
+  cal.addEventListener('keydown', e => {
+    if (e.key === 'Escape') { e.stopPropagation(); closeCal(true); return; }
+    const b = e.target.closest('.day[data-d]'); const stp = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: -7, ArrowDown: 7 }[e.key]; if (!b || !stp) return;
+    e.preventDefault(); const t = pd(b.dataset.d); t.setDate(t.getDate() + stp); if (t < today) return;
+    if (t.getMonth() !== D.vm || t.getFullYear() !== D.vy) { D.vy = t.getFullYear(); D.vm = t.getMonth(); drawCal(stp > 0 ? 1 : -1); }
+    const nb = $(`.day[data-d="${iso(t)}"]`, cal); if (nb) nb.focus();
+  });
+  document.addEventListener('click', e => { if (!cal.hidden && !e.composedPath().some(n => n.classList && n.classList.contains('datefield'))) closeCal(); });
+  function resetCal() { D.s = D.e = ''; commit(); closeCal(); }
+
+  /* ---- navigation ---- */
+  $$('form.step').forEach(f => f.addEventListener('submit', e => {
+    e.preventDefault(); const n = +f.dataset.step;
+    if (!validators[n]()) { focusFirstError(f); return; }
+    if (n < 4) go(n + 1); else submit();
+  }));
+  $$('[data-back]').forEach(b => { b.setAttribute('aria-label', 'Back to the previous step'); b.onclick = () => go(state.step - 1); });
+  $('#saveExit').onclick = () => alert('Your draft is saved. In the live product you would return to your dashboard.');
+
+  // Unique reference: millisecond timestamp (base36) + 2 random characters, checked against refs already issued in this browser.
+  // A real backend would issue the final number so it is unique across all users.
+  function makeRef() {
+    let seen = []; try { seen = JSON.parse(localStorage.getItem('gpRefs') || '[]'); } catch (e) {}
+    let ref;
+    do {
+      const t = Date.now().toString(36).toUpperCase().padStart(8, '0');
+      const r = Array.from(crypto.getRandomValues(new Uint8Array(2)), b => (b % 36).toString(36)).join('').toUpperCase();
+      ref = `${t.slice(0, 4)}-${t.slice(4)}${r}`;
+    } while (seen.includes(ref));
+    try { localStorage.setItem('gpRefs', JSON.stringify(seen.concat(ref).slice(-200))); } catch (e) {}
+    return ref;
+  }
+  function submit() {
+    state.ref = makeRef();
+    drawBarcode(state.ref);
+    $('#okRef').textContent = 'Posted · Ref GP-' + state.ref;
+    const where = $('#loc').value.trim();
+    $('#okSub').textContent = `We’re matching ${$('#name').value.trim()} with verified performers (${[...state.acts].join(', ')}) in ${where}. Expect your first proposals within 24 hours.`;
+    $('#okMail').textContent = $('#email').value.trim();
+    go(5); const t = $('#ticket'); t.classList.remove('pop', 'nudge'); void t.offsetWidth; t.classList.add('pop'); confetti();
+    // once the confetti has fallen and cleared, the ticket lifts, catches the light and settles back
+    clearTimeout(shineT);
+    shineT = setTimeout(() => { if (state.step === 5) { t.classList.remove('pop', 'nudge', 'shine'); void t.offsetWidth; t.classList.add('shine'); } }, 2600);
+  }
+  function confetti() {
+    if (matchMedia('(prefers-reduced-motion:reduce)').matches) return;
+    const cols = ['#D9432B', '#F4C9A0', '#2B1A16', '#4F7A5A'];
+    for (let i = 0; i < 46; i++) { const d = document.createElement('i'); d.className = 'cf'; d.style.left = Math.random() * 100 + 'vw'; d.style.background = cols[i % cols.length];
+      d.style.animationDuration = 1.6 + Math.random() * 1.8 + 's'; d.style.animationDelay = Math.random() * .4 + 's'; d.style.transform = `rotate(${Math.random() * 360}deg)`; document.body.appendChild(d); setTimeout(() => d.remove(), 4200); }
+  }
+  $('#another').onclick = () => { $$('input:not([type=range]),select,textarea').forEach(i => { i.type === 'checkbox' ? i.checked = false : i.value = ''; });
+    Object.assign(state, { cat: '', dur: '', perf: 4, sets: 2, ref: '000 000' }); state.acts.clear(); state.genres.clear();
+    $$('.cat').forEach(c => c.setAttribute('aria-checked', 'false')); $('#catNote').classList.remove('show');
+    chips('#acts', ACTS, state.acts); chips('#genres', GENRES, state.genres); chips('#dur', DURS, null, true);
+    counter('#cPerf', 'perf', 1, 30, 'performer', 'performers'); counter('#cSets', 'sets', 1, 10, 'set', 'sets');
+    bmin.value = 60000; bmax.value = 150000; budget(); resetCal(); drawBarcode('000 000'); go(1); };
+  $('#viewReq').onclick = () => alert('In the live product this opens your requirement page, where proposals will appear.');
+
+  // staggered entrance for every step's content
+  $$('.step').forEach(st => [...$$('.pill,.kicker,h1,.sub', st), ...$$('.form > *,.next,.mail', st), ...$$('.actions', st)].forEach((el, i) => { el.classList.add('rise'); el.style.setProperty('--i', i); }));
+  // ticket follows the pointer a little
+  if (matchMedia('(hover:hover) and (prefers-reduced-motion:no-preference)').matches) {
+    const tk = $('#ticket'); let raf = 0;
+    addEventListener('pointermove', e => { cancelAnimationFrame(raf); raf = requestAnimationFrame(() => { tk.style.setProperty('--ry', ((e.clientX / innerWidth - .5) * 9).toFixed(2) + 'deg'); tk.style.setProperty('--rx', ((.5 - e.clientY / innerHeight) * 7).toFixed(2) + 'deg'); }); });
+  }
+  drawStepper(); updateTicket(); inited = true;
+})();
+</script>
+</body>
+</html>
